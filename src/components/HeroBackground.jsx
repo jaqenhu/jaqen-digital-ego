@@ -16,14 +16,16 @@ export default function HeroBackground() {
     let width = 0
     let height = 0
     let dpr = Math.min(window.devicePixelRatio || 1, 2)
-    const prefersReduced = window.matchMedia(
+    const motionPreference = window.matchMedia(
       '(prefers-reduced-motion: reduce)',
-    ).matches
+    )
+    let isVisible = true
 
     const pointer = { x: -9999, y: -9999 }
     let particles = []
 
     const resize = () => {
+      dpr = Math.min(window.devicePixelRatio || 1, 2)
       width = canvas.clientWidth
       height = canvas.clientHeight
       canvas.width = width * dpr
@@ -39,9 +41,11 @@ export default function HeroBackground() {
         vy: (Math.random() - 0.5) * 0.22,
         r: Math.random() * 1.6 + 0.6,
       }))
+      syncAnimation()
     }
 
     const step = () => {
+      raf = 0
       ctx.clearRect(0, 0, width, height)
 
       for (let i = 0; i < particles.length; i += 1) {
@@ -103,8 +107,22 @@ export default function HeroBackground() {
         ctx.fill()
       }
 
-      raf = requestAnimationFrame(step)
+      if (isVisible && !document.hidden && !motionPreference.matches) {
+        raf = requestAnimationFrame(step)
+      }
     }
+
+    const syncAnimation = () => {
+      cancelAnimationFrame(raf)
+      raf = 0
+      if (!isVisible || document.hidden) return
+      if (motionPreference.matches) step()
+      else raf = requestAnimationFrame(step)
+    }
+    const visibilityObserver = new IntersectionObserver(([entry]) => {
+      isVisible = entry.isIntersecting
+      syncAnimation()
+    })
 
     const onPointerMove = (e) => {
       const rect = canvas.getBoundingClientRect()
@@ -128,26 +146,25 @@ export default function HeroBackground() {
     }
 
     resize()
+    visibilityObserver.observe(canvas)
     window.addEventListener('resize', resize)
     window.addEventListener('pointermove', onPointerMove)
     window.addEventListener('pointerleave', onPointerLeave)
     window.addEventListener('blur', onPointerLeave)
     document.addEventListener('pointerout', onPointerOut)
-
-    if (prefersReduced) {
-      step()
-      cancelAnimationFrame(raf)
-    } else {
-      raf = requestAnimationFrame(step)
-    }
+    document.addEventListener('visibilitychange', syncAnimation)
+    motionPreference.addEventListener('change', syncAnimation)
 
     return () => {
       cancelAnimationFrame(raf)
+      visibilityObserver.disconnect()
       window.removeEventListener('resize', resize)
       window.removeEventListener('pointermove', onPointerMove)
       window.removeEventListener('pointerleave', onPointerLeave)
       window.removeEventListener('blur', onPointerLeave)
       document.removeEventListener('pointerout', onPointerOut)
+      document.removeEventListener('visibilitychange', syncAnimation)
+      motionPreference.removeEventListener('change', syncAnimation)
     }
   }, [])
 

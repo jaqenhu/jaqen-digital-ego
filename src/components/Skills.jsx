@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { skills } from '../data.js'
 import { useReveal } from '../hooks/useReveal.js'
+import { gsap, useGSAP } from '../lib/motion.js'
 
 const coreTools = ['FastAPI', 'FastGPT', 'LangChain', 'RAGFlow', 'n8n', 'Docker']
 const deliverySteps = ['Scope', 'Build', 'Evaluate', 'Deploy']
@@ -8,7 +9,52 @@ const deliverySteps = ['Scope', 'Build', 'Evaluate', 'Deploy']
 export default function Skills() {
   const headRef = useReveal()
   const sectionRef = useRef(null)
+  const deliveryRef = useRef(null)
   const [isActive, setIsActive] = useState(false)
+
+  useGSAP(() => {
+    const media = gsap.matchMedia()
+    const steps = deliveryRef.current.querySelectorAll('.skills__delivery-step')
+    const progress = deliveryRef.current
+
+    media.add('(prefers-reduced-motion: no-preference)', () => {
+      const loop = gsap.timeline({ paused: true, repeat: -1 })
+        .set(steps, { attr: { 'data-lit': 'false' } }, 0)
+        .set(progress, { '--delivery-progress': 0 }, 0)
+
+      steps.forEach((step, index) => {
+        loop.set(step, { attr: { 'data-lit': 'true' } }, index * 0.5)
+        if (index > 0) {
+          loop.to(progress, {
+            '--delivery-progress': index / (steps.length - 1), duration: 0.35, ease: 'power1.inOut',
+          }, index * 0.5)
+        }
+      })
+      // Four half-second beats, then start again at Scope.
+      loop.set(steps, { attr: { 'data-lit': 'false' } }, steps.length * 0.5)
+
+      let visible = false
+      const syncPlayback = () => {
+        if (visible && !document.hidden) loop.resume()
+        else loop.pause()
+      }
+      const observer = new IntersectionObserver(([entry]) => {
+        visible = entry.isIntersecting
+        syncPlayback()
+      }, { threshold: 0.2 })
+      observer.observe(deliveryRef.current)
+      document.addEventListener('visibilitychange', syncPlayback)
+      return () => {
+        observer.disconnect()
+        document.removeEventListener('visibilitychange', syncPlayback)
+      }
+    })
+    media.add('(prefers-reduced-motion: reduce)', () => {
+      gsap.set(steps, { attr: { 'data-lit': 'true' } })
+      gsap.set(progress, { '--delivery-progress': 1 })
+    })
+    return () => media.revert()
+  }, { scope: deliveryRef })
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -66,6 +112,7 @@ export default function Skills() {
                 </h3>
                 <ol
                   className="skills__delivery"
+                  ref={deliveryRef}
                   aria-labelledby="skills-delivery-title"
                 >
                   {deliverySteps.map((step) => (

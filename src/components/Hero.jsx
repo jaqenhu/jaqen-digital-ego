@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { profile } from '../data.js'
+import { gsap, useGSAP } from '../lib/motion.js'
 import HeroBackground from './HeroBackground.jsx'
 
 const roles = [
@@ -9,11 +10,53 @@ const roles = [
 ]
 
 export default function Hero() {
+  const sectionRef = useRef(null)
+  const introRef = useRef(null)
   const [roleIndex, setRoleIndex] = useState(0)
   const [typedRole, setTypedRole] = useState('')
   const [isDeleting, setIsDeleting] = useState(false)
+  const [reducedMotion, setReducedMotion] = useState(
+    () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+  )
+
+  useGSAP(() => {
+    const media = gsap.matchMedia()
+    media.add('(prefers-reduced-motion: no-preference)', () => {
+      // A restored scroll position or section link should not replay an unseen intro.
+      if (sectionRef.current.getBoundingClientRect().bottom <= 0) return
+
+      const select = gsap.utils.selector(sectionRef)
+      const intro = gsap.timeline({ defaults: { ease: 'power3.out' } }).timeScale(0.5)
+      introRef.current = intro
+      intro
+        .from(select('.hero__kicker'), { autoAlpha: 0, y: 8, duration: 0.3 }, 0)
+        .from(select('.hero__kicker-line'), {
+          scaleX: 0, transformOrigin: 'left center', duration: 0.45,
+        }, 0)
+        .from(select('.hero__title-text'), { yPercent: 108, duration: 0.7 }, 0.1)
+        .from(select('.hero__role-line'), { autoAlpha: 0, y: 16, duration: 0.5 }, 0.28)
+        .from(select('.hero__subtitle'), { autoAlpha: 0, y: 14, duration: 0.5 }, 0.38)
+        .from(select('.hero__actions'), { autoAlpha: 0, y: 10, duration: 0.4 }, 0.5)
+        .from(select('.hero__portrait-img'), {
+          autoAlpha: 0, scale: 1.035, y: 16, duration: 0.85,
+        }, 0.2)
+        .from(select('.hero__portrait-aura'), {
+          autoAlpha: 0, scale: 0.94, duration: 0.8,
+        }, 0.2)
+      return () => { introRef.current = null }
+    })
+    return () => media.revert()
+  }, { scope: sectionRef })
 
   useEffect(() => {
+    const preference = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const onChange = () => setReducedMotion(preference.matches)
+    preference.addEventListener('change', onChange)
+    return () => preference.removeEventListener('change', onChange)
+  }, [])
+
+  useEffect(() => {
+    if (reducedMotion) return
     const currentRole = roles[roleIndex]
     const isComplete = typedRole === currentRole
     const isEmpty = typedRole === ''
@@ -41,10 +84,15 @@ export default function Hero() {
     }, delay)
 
     return () => window.clearTimeout(timer)
-  }, [isDeleting, roleIndex, typedRole])
+  }, [isDeleting, roleIndex, typedRole, reducedMotion])
 
   return (
-    <section id="home" className="hero">
+    <section
+      id="home"
+      className="hero"
+      ref={sectionRef}
+      onFocusCapture={() => introRef.current?.progress(1)}
+    >
       <div className="hero__media" aria-hidden="true">
         <HeroBackground />
         <div className="hero__grid" />
@@ -60,12 +108,14 @@ export default function Hero() {
             {profile.handle} - {profile.location}
           </p>
           <h1 className="hero__title">
-            <span className="text-gradient">Hello, I'm Jaqen HU</span>
+            <span className="hero__title-mask">
+              <span className="hero__title-text text-gradient">Hello, I'm Jaqen HU</span>
+            </span>
           </h1>
           <p className="hero__role-line">
             <span className="hero__role-prefix text-gradient">A </span>
-            <span className="hero__typed-role" aria-live="polite">
-              {typedRole}
+            <span className="hero__typed-role">
+              {reducedMotion ? roles[0] : typedRole}
             </span>
             <span className="hero__type-cursor" aria-hidden="true">
               |

@@ -1,24 +1,89 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { projects } from '../data.js'
 import { useReveal } from '../hooks/useReveal.js'
+import { gsap, useGSAP } from '../lib/motion.js'
+import ProjectModal from './ProjectModal.jsx'
 
-function ProjectCard({ project, onOpen }) {
-  const ref = useReveal()
+function ProjectCard({ project, index, onOpen }) {
+  const ref = useRef(null)
+  const mediaRef = useRef(null)
+  const entranceRef = useRef(null)
+  const hasEnteredRef = useRef(false)
+
+  useGSAP(() => {
+    const media = gsap.matchMedia()
+    media.add({
+      all: 'all',
+      wide: '(min-width: 861px)',
+      desktop: '(min-width: 861px) and (hover: hover) and (pointer: fine)',
+      reduced: '(prefers-reduced-motion: reduce)',
+    }, ({ conditions }) => {
+      if (conditions.reduced) return
+      const select = gsap.utils.selector(ref)
+      if (!hasEnteredRef.current) {
+        const imageDirection = conditions.wide && index % 2 === 1 ? 1 : -1
+        const distance = () => Math.min(ref.current.clientWidth * 0.3, conditions.wide ? 220 : 100)
+        const entrance = gsap.timeline({
+          defaults: { duration: 1.5, ease: 'power3.out' },
+          scrollTrigger: { trigger: ref.current, start: 'top 86%', once: true },
+          onComplete: () => {
+            hasEnteredRef.current = true
+            gsap.set([
+              mediaRef.current,
+              ...select('.project-card__body'),
+            ], { clearProps: 'opacity,visibility,transform' })
+          },
+        })
+        entranceRef.current = entrance
+        entrance
+          .from(mediaRef.current, {
+            x: () => imageDirection * distance(), autoAlpha: 0,
+          }, 0)
+          .from(select('.project-card__body'), {
+            x: () => -imageDirection * distance(), autoAlpha: 0,
+          }, 0)
+      }
+
+      if (conditions.desktop) {
+        gsap.fromTo(select('.project-card__image-motion'), { y: -12, scale: 1.08 }, {
+          y: 12, scale: 1.08, ease: 'none',
+          scrollTrigger: {
+            trigger: ref.current, start: 'top bottom', end: 'bottom top', scrub: true,
+          },
+        })
+      }
+      return () => { entranceRef.current = null }
+    })
+    return () => media.revert()
+  }, { scope: ref })
+
+  const open = (event) => {
+    entranceRef.current?.progress(1)
+    onOpen(project, mediaRef.current, event.currentTarget)
+  }
 
   return (
-    <article className="project-card reveal" ref={ref}>
+    <article
+      className="project-card"
+      ref={ref}
+      onFocusCapture={() => entranceRef.current?.progress(1)}
+    >
       <button
         className="project-card__media"
         type="button"
-        onClick={() => onOpen(project)}
+        ref={mediaRef}
+        onClick={open}
+        aria-haspopup="dialog"
         aria-label={`View details for ${project.title}`}
       >
-        <img src={project.image} alt="" loading="lazy" />
+        <span className="project-card__image-motion">
+          <img src={project.image} alt="" loading="lazy" />
+        </span>
       </button>
 
       <div className="project-card__body">
         <h3 className="project-card__title">
-          <button type="button" onClick={() => onOpen(project)}>
+          <button type="button" onClick={open} aria-haspopup="dialog">
             <span className="text-gradient">{project.title}</span>
           </button>
         </h3>
@@ -34,87 +99,13 @@ function ProjectCard({ project, onOpen }) {
   )
 }
 
-function ProjectModal({ project, onClose }) {
-  const closeButtonRef = useRef(null)
-
-  useEffect(() => {
-    const previousOverflow = document.body.style.overflow
-    const previousActiveElement = document.activeElement
-    document.body.style.overflow = 'hidden'
-    closeButtonRef.current?.focus()
-
-    const handleKeyDown = (event) => {
-      if (event.key === 'Escape') onClose()
-    }
-
-    window.addEventListener('keydown', handleKeyDown)
-
-    return () => {
-      document.body.style.overflow = previousOverflow
-      window.removeEventListener('keydown', handleKeyDown)
-      previousActiveElement?.focus()
-    }
-  }, [onClose])
-
-  return (
-    <div className="project-modal" role="presentation" onMouseDown={onClose}>
-      <article
-        className="project-modal__dialog"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={`project-modal-title-${project.id}`}
-        onMouseDown={(event) => event.stopPropagation()}
-      >
-        <button
-          ref={closeButtonRef}
-          className="project-modal__close"
-          type="button"
-          onClick={onClose}
-          aria-label="Close project details"
-        >
-          <span aria-hidden="true">×</span>
-        </button>
-
-        <div className="project-modal__media">
-          <img src={project.image} alt={project.title} />
-        </div>
-
-        <div className="project-modal__content">
-          <span className="project-card__category">{project.category}</span>
-          <h3 id={`project-modal-title-${project.id}`} className="project-modal__title">
-            <span className="text-gradient">{project.title}</span>
-          </h3>
-          <p className="project-modal__desc">{project.description}</p>
-
-          {project.features && (
-            <div className="project-modal__detail">
-              <span className="project-modal__label">Core Features</span>
-              <p>{project.features}</p>
-            </div>
-          )}
-
-          {project.results && (
-            <div className="project-modal__detail project-modal__detail--result">
-              <span className="project-modal__label">Results</span>
-              <p>{project.results}</p>
-            </div>
-          )}
-
-          <span className="project-modal__label project-modal__tech-label">Tech Stack</span>
-          <ul className="project-card__tags">
-            {project.tags.map((tag) => (
-              <li key={tag}>{tag}</li>
-            ))}
-          </ul>
-        </div>
-      </article>
-    </div>
-  )
-}
-
 export default function Projects() {
   const ref = useReveal()
   const [activeProject, setActiveProject] = useState(null)
+  const openProject = useCallback((project, source, opener) => {
+    setActiveProject({ project, source, opener })
+  }, [])
+  const closeProject = useCallback(() => setActiveProject(null), [])
 
   return (
     <section id="projects" className="section projects">
@@ -126,14 +117,14 @@ export default function Projects() {
         </div>
 
         <div className="projects__list">
-          {projects.map((project) => (
-            <ProjectCard key={project.id} project={project} onOpen={setActiveProject} />
+          {projects.map((project, index) => (
+            <ProjectCard key={project.id} project={project} index={index} onOpen={openProject} />
           ))}
         </div>
       </div>
 
       {activeProject && (
-        <ProjectModal project={activeProject} onClose={() => setActiveProject(null)} />
+        <ProjectModal {...activeProject} onClose={closeProject} />
       )}
     </section>
   )
