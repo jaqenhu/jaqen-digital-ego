@@ -113,7 +113,10 @@ export default function Projects() {
         <div className="section__head reveal" ref={ref}>
           <span className="section__index">02</span>
           <h2 className="section__title"><span className="text-gradient">Selected Work</span></h2>
-          <span className="section__en">SELECTED&nbsp;WORKS</span>
+          <div className="projects__heading-note">
+            <span className="section__en">SELECTED&nbsp;WORKS</span>
+            <p className="projects__hint">Click to view details</p>
+          </div>
         </div>
 
         <div className="projects__list">

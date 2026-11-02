@@ -5,7 +5,7 @@ const testimonials = [
     title: 'From ambiguity to delivery.',
     quote:
       'Jaqen turns complex AI requirements into clear technical decisions. He communicates trade-offs early and takes ownership from implementation through deployment and handoff.',
-    context: 'AI Agent & Workflow Automation',
+    context: 'Technical Project Lead',
   },
   {
     name: 'Ning',
@@ -13,7 +13,7 @@ const testimonials = [
     title: 'Built around how we work.',
     quote:
       'Jaqen understands the questions our team needs to answer. He focuses on retrieval quality and clear sources, helping us use AI with a better understanding of its limits.',
-    context: 'Enterprise RAG Knowledge Base',
+    context: 'Knowledge Management Lead',
   },
   {
     name: 'Xie',
@@ -21,7 +21,7 @@ const testimonials = [
     title: 'Clear, thoughtful collaboration.',
     quote:
       'Jaqen translates our training needs into practical VR experiences. He turns feedback into clear priorities and keeps us aligned on interaction details, progress, and next steps.',
-    context: 'Digital Twin & VR Training',
+    context: 'Training Program Manager',
   },
 ]
 
