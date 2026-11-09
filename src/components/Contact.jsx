@@ -178,13 +178,40 @@ export default function Contact() {
         <div className="contact__channels">
           <a href={`mailto:${profile.email}`} className="contact__channel">
             <span className="contact__channel-label contact__channel-label--strong">
-              <span
-                className="contact__channel-icon contact__channel-icon--email"
-                aria-hidden="true"
+              <img
+                className="contact__channel-icon"
+                src="/icons/qqmail.png"
+                alt=""
+                width="24"
+                height="24"
               />
               EMAIL
             </span>
             <span className="contact__channel-value">{profile.email}</span>
+          </a>
+          <a
+            href={profile.github}
+            className="contact__channel"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span className="contact__channel-label contact__channel-label--strong">
+              <img className="contact__channel-icon" src="/icons/github.svg" alt="" width="24" height="24" />
+              GITHUB
+            </span>
+            <span className="contact__channel-value">github.com/jaqenhu</span>
+          </a>
+          <a
+            href={profile.linkedin}
+            className="contact__channel"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span className="contact__channel-label contact__channel-label--strong">
+              <img className="contact__channel-icon" src="/icons/linkedin.svg" alt="" width="24" height="24" />
+              LINKEDIN
+            </span>
+            <span className="contact__channel-value">linkedin.com/in/jaqen-hu</span>
           </a>
           <a
             href={`tel:${profile.phone.replaceAll('-', '')}`}
@@ -195,22 +222,12 @@ export default function Contact() {
             </span>
             <span className="contact__channel-value">{profile.phone}</span>
           </a>
-          <div className="contact__channel">
-            <span className="contact__channel-label contact__channel-label--strong">
-              <span
-                className="contact__channel-icon contact__channel-icon--location"
-                aria-hidden="true"
-              />
-              LOCATION
-            </span>
-            <span className="contact__channel-value">{profile.location}</span>
-          </div>
         </div>
       </div>
 
       <footer className="footer">
         <div className="container footer__inner">
-          <span>© 2026 {profile.name} · {profile.alias}</span>
+          <span>© 2026 {profile.name}</span>
           <a href="#home">Back to top ↑</a>
         </div>
       </footer>

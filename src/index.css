@@ -1849,16 +1849,17 @@ ul {
 
 .contact__channels {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   margin-top: 96px;
   border-top: 1px solid var(--line);
 }
 
 .contact__channel {
   display: flex;
+  min-width: 0;
   flex-direction: column;
   gap: 14px;
-  padding: 40px 36px 44px;
+  padding: 40px clamp(20px, 2.2vw, 36px) 44px;
   border-right: 1px solid var(--line);
   transition: background 0.5s var(--ease);
 }
@@ -1869,10 +1870,17 @@ ul {
 
 .contact__channel:last-child {
   border-right: none;
+  padding-right: 0;
 }
 
-.contact__channel:hover .contact__channel-value {
+.contact__channel:hover .contact__channel-value,
+.contact__channel:focus-visible .contact__channel-value {
   color: var(--accent);
+}
+
+.contact__channel:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
 }
 
 .contact__channel-label {
@@ -1892,62 +1900,26 @@ ul {
 }
 
 .contact__channel-icon {
-  position: relative;
-  display: inline-block;
   flex: 0 0 auto;
-  color: var(--accent-soft);
-}
-
-.contact__channel-icon--email {
-  width: 16px;
-  height: 12px;
-  border: 1.4px solid currentColor;
-  border-radius: 2px;
-}
-
-.contact__channel-icon--email::before {
-  content: '';
-  position: absolute;
-  top: -2px;
-  left: 2px;
-  width: 9px;
-  height: 9px;
-  border-left: 1.4px solid currentColor;
-  border-bottom: 1.4px solid currentColor;
-  transform: rotate(-45deg);
-}
-
-.contact__channel-icon--location {
-  width: 13px;
-  height: 13px;
-  margin-right: 2px;
-  border: 1.5px solid currentColor;
-  border-radius: 50% 50% 50% 0;
-  transform: rotate(-45deg);
-}
-
-.contact__channel-icon--location::after {
-  content: '';
-  position: absolute;
-  top: 3.5px;
-  left: 3.5px;
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: currentColor;
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  border-radius: 5px;
 }
 
 .contact__channel-value {
   font-family: var(--font-display);
-  font-size: 21px;
+  font-size: clamp(16px, 1.3vw, 21px);
   font-weight: 400;
+  overflow-wrap: anywhere;
   transition: color 0.4s var(--ease);
 }
 
 /* Better Call Saul 风格电话标签 */
 .contact__channel-label--saul {
+  width: fit-content;
   font-family: 'Kaushan Script', cursive;
-  font-size: clamp(28px, 2.6vw, 40px);
+  font-size: clamp(28px, 2.15vw, 36px);
   font-weight: 400;
   letter-spacing: 0.02em;
   line-height: 1.15;
@@ -1968,8 +1940,34 @@ ul {
   transform: rotate(-1deg) scale(1.02);
 }
 
-.contact__channel--phone:hover .contact__channel-value {
+.contact__channel--phone:hover .contact__channel-value,
+.contact__channel--phone:focus-visible .contact__channel-value {
   color: #f5d04a;
+}
+
+@media (min-width: 861px) and (max-width: 1100px) {
+  .contact__channels {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .contact__channel:nth-child(2n) {
+    border-right: none;
+    padding-right: 0;
+  }
+
+  .contact__channel:nth-child(2n + 1) {
+    padding-left: 0;
+  }
+
+  .contact__channel:nth-child(n + 3) {
+    border-top: 1px solid var(--line);
+  }
+}
+
+@media (max-width: 1100px) {
+  .contact__channel-value {
+    font-size: 21px;
+  }
 }
 
 /* ============ 页脚 ============ */

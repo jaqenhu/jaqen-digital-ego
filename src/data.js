@@ -8,6 +8,7 @@ export const profile = {
   email: 'jaqenhu@foxmail.com',
   phone: '+86 184-5712-6326',
   github: 'https://github.com/jaqenhu',
+  linkedin: 'https://linkedin.com/in/jaqen-hu',
   intro: [
     'I work deep in AI, LLM and VR, focused on integrating frontier technology and bringing it into production. Right now I am building AI Agents — exploring agent self-iteration, digital-twin scene optimization and the limits of VR interaction systems.',
     'I believe great technical products are born where academic exploration meets engineering practice. Whether it is open-source co-creation, project collaboration or technical exchange, I am glad to take part and build together.',
