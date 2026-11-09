@@ -51,6 +51,10 @@
 
 ## <img src="docs/readme-assets/code.png" width="26" height="26" alt="像素终端"> 本地运行
 
+Windows 下双击根目录中的 `一键启动.cmd`，即可构建最新页面、使用 PM2 启动后台服务并打开 [本地网站](http://127.0.0.1:5173)。关闭终端后仍可访问；修改页面后再次双击即可更新。
+
+双击 `停止服务.cmd` 可停止网站。重启电脑后，再次双击启动脚本即可运行。需要安装 Node.js 和 PM2（`npm install -g pm2`）。
+
 <details>
 <summary>环境、启动命令与目录结构</summary>
 

@@ -1517,12 +1517,6 @@ ul {
   overflow-wrap: anywhere;
 }
 
-.testimonials__draft-note {
-  margin-top: 24px;
-  color: #c5c5cc;
-  font-size: 13px;
-}
-
 @media (max-width: 1000px) {
   .testimonials__grid {
     grid-template-columns: 1fr;
@@ -1693,9 +1687,10 @@ ul {
 .contact-form {
   position: relative;
   min-width: 0;
-  padding: 0;
-  border: 0;
-  background: transparent;
+  padding: clamp(24px, 2vw, 32px);
+  border: 1px solid #303034;
+  border-radius: 14px;
+  background: #101011;
 }
 
 .contact-form__greeting {
@@ -1789,19 +1784,19 @@ ul {
 
 .contact-form__submit {
   flex-shrink: 0;
-  min-width: 98px;
-  min-height: 48px;
-  padding: 0 0 6px;
+  min-width: 140px;
+  min-height: 54px;
+  padding: 10px 24px;
   border: 0;
-  border-bottom: 1px solid currentColor;
-  border-radius: 0;
-  background: transparent;
+  border-radius: 5px;
+  background: #232325;
   color: var(--text);
   font-family: var(--font-contact-serif);
   font-size: 28px;
   font-weight: 400;
   line-height: 1.2;
-  text-align: left;
+  text-align: center;
+  text-decoration: none;
   cursor: pointer;
   transition:
     color 0.25s var(--ease),
@@ -2144,7 +2139,7 @@ ul {
   }
 
   .contact-form {
-    padding: 0;
+    padding: 24px 20px;
   }
 
   .contact-form__footer {

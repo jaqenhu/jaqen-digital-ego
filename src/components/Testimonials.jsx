@@ -82,10 +82,6 @@ export default function Testimonials() {
             </figure>
           ))}
         </div>
-
-        <p className="testimonials__draft-note">
-          Draft testimonials · wording pending confirmation.
-        </p>
       </div>
     </section>
   )
